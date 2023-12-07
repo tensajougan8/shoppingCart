@@ -1,15 +1,15 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document } from 'mongoose';
 
 const itemSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
+	name: String,
+	price: Number,
 });
 
 interface ItemDocument extends Document {
-  name: string;
-  price: number;
+	name: string;
+	price: number;
 }
 
-const Item = mongoose.model<ItemDocument>("Item", itemSchema);
+const Item = mongoose.model<ItemDocument>('Item', itemSchema);
 
 export default Item;
