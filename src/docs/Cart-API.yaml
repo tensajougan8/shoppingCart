@@ -1,0 +1,326 @@
+openapi: 3.0.0
+info:
+  title: Authentication API
+  description: API for user authentication
+  version: 1.0.
+servers:
+  - url: 'http://localhost:3000/api'
+    description: Local development server    
+tags:
+  - name: Auth API
+    description: Everything about the auth routes
+  - name: Checkout API
+    description: Everything about the checkout routes
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth API
+      summary: Login user
+      description: Logs in a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /auth/signup:
+    post:
+      tags:
+        - Auth API
+      summary: Register a new user
+      description: Registers a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  email:
+                    type: string
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /cart/checkout:
+    post:
+      tags:
+        - Checkout API
+      summary: Process checkout
+      description: Processes checkout for items with optional discount code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                itemIds:
+                  type: array
+                  items:
+                    type: string
+                discountCode:
+                  type: string
+      responses:
+        '200':
+          description: Checkout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/Order'
+                  totalPrice:
+                    type: number
+                  discountedPrice:
+                    type: number
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /admin/generate-code:
+    get:
+      summary: Generate Discount Code
+      description: Generates a discount code based on certain conditions.
+      responses:
+        '200':
+          description: Discount code generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discountCode:
+                    type: string
+        '403':
+          description: Condition not satisfied for discount code generation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /admin/user/{userID}:
+    get:
+      summary: Get User Information
+      description: Retrieves information about a specific user's orders.
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItemsPurchased:
+                    type: integer
+                  totalPurchaseAmount:
+                    type: number
+                  discountCodes:
+                    type: array
+                    items:
+                      type: string
+                  totalDiscountAmount:
+                    type: number
+        '404':
+          description: No orders found for this user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string      
+
+  /cart/:
+    patch:
+      summary: Add item to cart
+      description: Adds an item to the specified cart.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id:
+                  type: string
+                cartId:
+                  type: string
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  cart:
+                    type: string
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        discountCode:
+          type: string
+
+    Item:
+      type: object
+      properties:
+        price:
+          type: string
