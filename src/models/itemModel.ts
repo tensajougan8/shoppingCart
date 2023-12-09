@@ -5,7 +5,7 @@ const itemSchema = new mongoose.Schema({
   price: Number,
 });
 
-interface ItemDocument extends Document {
+export interface ItemDocument extends Document {
   name: string;
   price: number;
 }
